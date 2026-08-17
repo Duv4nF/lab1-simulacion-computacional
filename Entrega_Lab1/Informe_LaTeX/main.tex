@@ -1,0 +1,508 @@
+\documentclass[11pt,letterpaper]{article}
+
+% ============ EDITE AQUÍ SUS DATOS ANTES DE COMPILAR ============
+\newcommand{\nombreEstudiante}{Duván Felipe Baquero}
+\newcommand{\codigoEstudiante}{[código estudiantil]}
+\newcommand{\nombreDocente}{Ángel Alfonso Cruz Roa}
+% ================================================================
+
+% Codificación: compatible tanto con pdfLaTeX como con XeLaTeX/LuaLaTeX.
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+\else
+  \usepackage{fontspec}   % usa Latin Modern Unicode por defecto
+\fi
+
+% babel-spanish redefine \% e introduce su propio espaciado, lo que rompe
+% construcciones como \,\% y el uso de \% dentro de modo matemático.
+% Se guarda la versión original de LaTeX y se restaura tras cargar babel.
+\let\origpercent\%
+\usepackage[spanish,es-tabla]{babel}
+\AtBeginDocument{\let\%\origpercent}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{makecell}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\setlength{\parskip}{0.35em}
+\renewcommand{\arraystretch}{1.12}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Universidad de los Llanos}
+\rhead{\small Simulación Computacional --- Práctica N.\textsuperscript{o}\,01}
+\rfoot{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\begin{document}
+
+% =====================================================
+% PORTADA
+% =====================================================
+\begin{titlepage}
+\thispagestyle{empty}
+\centering
+\vspace*{\fill}
+
+{\large \textsc{Universidad de los Llanos}}\\[0.2cm]
+{\normalsize Facultad de Ciencias Básicas e Ingeniería}\\
+{\normalsize Programa de Ingeniería de Sistemas}\\[1.6cm]
+
+\rule{\textwidth}{0.8pt}\\[0.5cm]
+{\LARGE \textbf{Simulación \emph{ad hoc} de un sistema de cola simple}}\\[0.35cm]
+{\large Medidas de desempeño e intervalos de confianza\\ con 20 y 200 clientes atendidos}\\[0.5cm]
+\rule{\textwidth}{0.8pt}\\[1.6cm]
+
+{\normalsize Informe de la Práctica N.\textsuperscript{o}\,01}\\
+{\normalsize Curso: Simulación Computacional}\\[1.4cm]
+
+{\normalsize Presentado por:}\\[0.15cm]
+{\large \nombreEstudiante}\\
+{\normalsize Código: \codigoEstudiante}\\[1.2cm]
+
+{\normalsize Docente:}\\[0.15cm]
+{\large \nombreDocente}\\[1.6cm]
+
+{\normalsize Villavicencio, Meta \\ \today}
+
+\vspace*{\fill}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+% =====================================================
+\section{Objetivos}
+% =====================================================
+
+Esta práctica persigue cuatro objetivos concretos, tomados de la guía de laboratorio:
+
+\begin{itemize}[itemsep=2pt]
+    \item Introducir la simulación computacional mediante un caso \emph{ad hoc}: un sistema de cola simple con un solo servidor y un límite máximo en el número de clientes atendidos.
+    \item Generar las variables aleatorias del modelo ---tiempo entre llegadas y tiempo de servicio--- a partir de mecanismos de sorteo equivalentes a dados y ruletas, con distribución uniforme discreta.
+    \item Calcular las cinco medidas de desempeño definidas en el Capítulo 1 de \cite{Banks1998} e interpretar lo que cada una dice sobre el sistema.
+    \item Repetir la simulación diez veces en dos escenarios de distinta longitud (20 y 200 clientes) para construir intervalos de confianza al 95\,\% y al 99\,\%, y analizar cómo cambia la precisión de las estimaciones.
+\end{itemize}
+
+% =====================================================
+\section{Consulta previa}
+% =====================================================
+
+\subsection{¿Qué es una variable aleatoria?}
+
+Es una función que asigna un número real a cada resultado posible del espacio muestral de un experimento aleatorio. Dicho de otro modo, traduce resultados ---que pueden ser cualitativos--- a valores numéricos con los que sí se puede operar. Se llama \emph{discreta} cuando su recorrido es finito o infinito numerable, y \emph{continua} cuando puede tomar cualquier valor dentro de un intervalo de los reales.
+
+En esta práctica intervienen dos variables aleatorias discretas: el tiempo que transcurre entre la llegada de un cliente y la del siguiente, y el tiempo que el cajero tarda en atender a un cliente. Ninguna de las dos se conoce de antemano; de ahí que la simulación necesite \emph{sortearlas} en cada repetición en lugar de fijarles un valor.
+
+\subsection{¿En qué consiste la distribución de probabilidad uniforme discreta?}
+
+Una variable aleatoria $X$ sigue una distribución uniforme discreta sobre el conjunto de enteros $\{a, a+1, \dots, b\}$ cuando todos sus valores posibles tienen exactamente la misma probabilidad de ocurrir. Su función de masa de probabilidad es
+
+\[
+P(X = x) = \frac{1}{b - a + 1}, \qquad x = a,\, a+1,\, \dots,\, b,
+\]
+
+y su media y varianza son
+
+\[
+E[X] = \frac{a+b}{2}, \qquad \operatorname{Var}(X) = \frac{(b-a+1)^2 - 1}{12}.
+\]
+
+El dado común es el ejemplo clásico: $a=1$, $b=6$ y cada cara con probabilidad $1/6$. En la práctica se usan dos versiones de esta distribución: $U\{1,10\}$ para los tiempos entre llegadas (equivalente a una ruleta de diez sectores iguales) y $U\{1,6\}$ para los tiempos de servicio (un dado de seis caras).
+
+\subsection{¿En qué consiste un sistema de cola simple?}
+
+Un sistema de cola simple está formado por un flujo de clientes que llegan a una instalación donde hay \textbf{un único servidor}. Si al llegar el servidor está libre, el cliente pasa de inmediato; si está ocupado, se forma en la cola y espera su turno. Cuando termina su servicio, abandona el sistema.
+
+Cuatro elementos lo describen por completo:
+
+\begin{enumerate}[itemsep=1pt]
+    \item El \textbf{proceso de llegadas}, caracterizado por la distribución del tiempo entre llegadas.
+    \item El \textbf{mecanismo de servicio}, caracterizado por la distribución del tiempo de atención.
+    \item La \textbf{disciplina de la cola}, que aquí es FIFO (\emph{first in, first out}): se atiende en el orden de llegada.
+    \item La \textbf{capacidad}: un servidor y sala de espera ilimitada.
+\end{enumerate}
+
+El caso que se simula es la ventanilla de un banco. Es un modelo sencillo, pero contiene el ingrediente esencial de cualquier sistema de espera: cuando las llegadas se agolpan, la cola crece; cuando se espacian, el servidor queda ocioso.
+
+\subsection{¿Qué es y cómo se calcula la media muestral?}
+
+La media muestral es el promedio aritmético de las observaciones de una muestra y funciona como estimador puntual de la media poblacional $\mu$. Para $n$ observaciones $X_1, X_2, \dots, X_n$:
+
+\[
+\bar{X} = \frac{1}{n}\sum_{i=1}^{n} X_i .
+\]
+
+En este informe cada $X_i$ no es un cliente individual, sino el valor que tomó una medida de desempeño \emph{en toda una corrida}. Con diez corridas por escenario, $n = 10$.
+
+\subsection{¿Qué es y cómo se calcula la desviación estándar muestral?}
+
+Mide qué tan dispersos están los datos respecto de su media. Se define como la raíz cuadrada de la varianza muestral:
+
+\[
+S^2 = \frac{1}{n-1}\sum_{i=1}^{n}\left(X_i - \bar{X}\right)^2, \qquad S = \sqrt{S^2}.
+\]
+
+El divisor $n-1$ ---y no $n$--- es lo que distingue la desviación estándar \emph{muestral} de la poblacional: corrige el sesgo que aparece al estimar la dispersión usando una media que también fue estimada de la misma muestra. En el cuaderno de Python esto corresponde al argumento \texttt{ddof=1}.
+
+Un valor de $S$ alto frente a $\bar{X}$ significa que las corridas arrojaron resultados muy distintos entre sí, y por lo tanto que una sola corrida sería poco confiable para describir el sistema.
+
+\subsection{¿Qué es un intervalo de confianza?}
+
+Es un rango de valores construido a partir de la muestra que, con una probabilidad declarada de antemano, contiene el parámetro poblacional desconocido. La expresión \guillemotleft intervalo al 95\,\%\guillemotright{} no significa que el parámetro tenga 95\,\% de probabilidad de caer allí, sino que si el experimento completo se repitiera muchas veces, el 95\,\% de los intervalos así construidos contendría el valor verdadero.
+
+Cuando la varianza poblacional se desconoce y hay que estimarla con $S$, que es el caso habitual en simulación, el intervalo para la media se apoya en la distribución $t$ de Student con $n-1$ grados de libertad:
+
+\[
+\bar{X} \pm h, \qquad h = t_{n-1,\,1-\alpha/2}\,\frac{S}{\sqrt{n}},
+\]
+
+donde $h$ es la \textbf{media anchura} o \emph{half-width}. La fórmula deja ver de qué depende la precisión: crece con la variabilidad $S$ y con el nivel de confianza (a través de $t$), y disminuye con la raíz del número de repeticiones. Esa última relación, $1/\sqrt{n}$, explica por qué duplicar la precisión exige cuadruplicar el número de corridas.
+
+% =====================================================
+\section{Fundamento teórico}
+% =====================================================
+
+El desarrollo se apoya en el Capítulo 1 del \emph{Handbook of Simulation} \cite{Banks1998}, en particular en las secciones 1.2 (\emph{Definition of simulation}), 1.11 (\emph{Experimentation and output analysis}) y 1.11.1 (\emph{Statistical Confidence and Run Length}), además de la presentación de clase \emph{2. Principles of Simulation}.
+
+\subsection{El modelo y sus recurrencias}
+
+La simulación es de tipo \emph{ad hoc} y por eventos discretos: en lugar de avanzar el reloj minuto a minuto, se calculan directamente los instantes en que ocurre algo relevante (una llegada, el inicio de un servicio, su finalización). Con los tiempos entre llegadas $A_i$ y los tiempos de servicio $S_i$ ya sorteados, todas las demás columnas de la tabla se deducen mediante recurrencias. Para el cliente $i$, con el primer cliente llegando en el instante $0$:
+
+\begin{align}
+\text{Hora de llegada:} \quad & L_i = L_{i-1} + A_i, & L_1 &= 0 \label{eq:lleg}\\
+\text{Inicio del servicio:} \quad & B_i = \max\left(L_i,\; F_{i-1}\right), & B_1 &= L_1 \label{eq:ini}\\
+\text{Fin del servicio:} \quad & F_i = B_i + S_i & & \label{eq:fin}\\
+\text{Tiempo en el sistema:} \quad & T_i = F_i - L_i & & \label{eq:sis}\\
+\text{Tiempo ocioso del servidor:} \quad & O_i = \max\left(0,\; L_i - F_{i-1}\right), & O_1 &= 0 \label{eq:oci}\\
+\text{Tiempo en cola:} \quad & W_i = B_i - L_i & & \label{eq:col}
+\end{align}
+
+La ecuación~\eqref{eq:ini} es el corazón del modelo: un cliente empieza a ser atendido cuando ya llegó \emph{y} el servidor quedó libre, lo que ocurra más tarde. De ese mismo máximo salen los dos casos complementarios: si el cliente llega y el servidor sigue ocupado, hay espera en cola (ecuación~\eqref{eq:col}); si el servidor termina antes de que llegue el siguiente, hay tiempo ocioso (ecuación~\eqref{eq:oci}). En una misma fila, $W_i$ y $O_i$ no pueden ser ambos positivos.
+
+\subsection{Las cinco medidas de desempeño}
+
+Sea $N$ el número de clientes atendidos, $T_{\text{total}} = F_N$ la duración de la corrida y $N_e$ la cantidad de clientes que encontraron el servidor ocupado. Las medidas que pide la guía se calculan así:
+
+\begin{align}
+\text{Tiempo promedio en el sistema} &= \frac{1}{N}\sum_{i=1}^{N} T_i \\[2pt]
+\text{Porcentaje de tiempo ocioso} &= \frac{\sum_{i=1}^{N} O_i}{T_{\text{total}}} \\[2pt]
+\text{Espera promedio por cliente} &= \frac{1}{N}\sum_{i=1}^{N} W_i \\[2pt]
+\text{Fracción de clientes que esperó} &= \frac{N_e}{N}, \qquad N_e = \#\{i : W_i > 0\} \\[2pt]
+\text{Espera promedio de quienes esperaron} &= \frac{\sum_{i=1}^{N} W_i}{N_e}
+\end{align}
+
+Conviene notar la diferencia entre las dos últimas medidas de espera: la tercera reparte el tiempo total de cola entre \emph{todos} los clientes, incluidos los que no esperaron nada, mientras que la quinta lo reparte solo entre quienes efectivamente hicieron fila. Por construcción la quinta es siempre mayor o igual que la tercera, y el cociente entre ambas es exactamente la fracción que esperó.
+
+\subsection{Valores teóricos de referencia}
+
+Como las dos distribuciones son conocidas, se pueden anticipar algunos valores contra los cuales contrastar la simulación. Con $A \sim U\{1,10\}$ y $S \sim U\{1,6\}$:
+
+\[
+E[A] = \frac{1+10}{2} = 5{,}5 \ \text{min}, \qquad E[S] = \frac{1+6}{2} = 3{,}5 \ \text{min},
+\]
+
+de donde la \textbf{utilización teórica del servidor} es
+
+\begin{equation}
+\rho = \frac{E[S]}{E[A]} = \frac{3{,}5}{5{,}5} = 0{,}6364,
+\label{eq:rho}
+\end{equation}
+
+y en consecuencia la proporción de tiempo ocioso esperada a largo plazo es $1-\rho = 0{,}3636$. Como $\rho < 1$, el sistema es estable: el servidor puede absorber el flujo de llegadas sin que la cola crezca indefinidamente. Este valor se usará más adelante como control de calidad de los resultados.
+
+% =====================================================
+\section{Materiales y metodología}
+% =====================================================
+
+\subsection{Equipos y materiales}
+
+Se emplearon un computador portátil con acceso a internet, Google Colaboratory para la ejecución del cuaderno de Python, una hoja de cálculo para el registro tabular de las corridas y el Capítulo 1 de \cite{Banks1998} como referencia conceptual.
+
+\subsection{Generación de las variables aleatorias}
+\label{sec:generacion}
+
+La guía admite obtener los valores aleatorios con dados o ruletas, físicos o en línea. El diseño experimental de esta práctica exige, sin embargo, $2\times(20+200)\times10 = 4400$ valores sorteados, cantidad que hace inviable el registro manual y, sobre todo, imposible de auditar. Por eso los valores se generaron con el generador de números pseudoaleatorios de \texttt{NumPy} (\texttt{Generator.integers}), configurado para producir exactamente las mismas distribuciones que los mecanismos físicos propuestos: $U\{1,10\}$ para el tiempo entre llegadas y $U\{1,6\}$ para el tiempo de servicio. Se usaron \textbf{dos generadores independientes}, uno por variable, tal como la guía exige emplear un dado o una ruleta distinta para cada una.
+
+Ambos generadores se inicializaron con una semilla fija (\texttt{SEED = 20260817}), de modo que cualquier persona que ejecute el cuaderno adjunto obtiene los mismos números y, por lo tanto, exactamente las mismas tablas de este informe. Esa reproducibilidad es la ventaja concreta frente al sorteo manual.
+
+Ahora bien, sustituir el dado por un algoritmo obliga a demostrar que el sustituto se comporta como el original. Para eso se aplicó una prueba $\chi^2$ de bondad de ajuste sobre la totalidad de los valores generados en cada escenario, contrastando las frecuencias observadas de cada resultado contra las esperadas bajo uniformidad. Los resultados aparecen en la Tabla~\ref{tab:valgen}.
+
+\input{valgen.tex}
+
+En los cuatro casos el valor $p$ supera ampliamente el umbral de $0{,}05$, así que no hay evidencia para rechazar la hipótesis de uniformidad; las medias observadas también quedan muy cerca de las teóricas ($5{,}47$ frente a $5{,}5$, y $3{,}49$ frente a $3{,}5$, en el escenario de 200 clientes). El generador es, para efectos de esta práctica, indistinguible de la ruleta y del dado.
+
+\subsection{Verificación del procedimiento de cálculo}
+
+Antes de producir datos propios se validó la implementación reproduciendo el ejemplo del libro. Se cargaron las columnas (2) y (4) de la Tabla 1.1 del Capítulo 1 de \cite{Banks1998}\footnote{La guía de laboratorio se refiere al tiempo de servicio como \guillemotleft columna 5\guillemotright, pero en la Tabla 1.1 esa variable aparece en la columna (4), ya que la (5) corresponde al instante en que inicia el servicio. En este informe se conserva la numeración de la Tabla 1.1.} y se recalcularon con las ecuaciones \eqref{eq:lleg}--\eqref{eq:col} las siete columnas restantes. La coincidencia fue exacta, incluidos los tres totales de control publicados en el libro: 79 minutos de tiempo en el sistema, 30 de tiempo ocioso y 10 de tiempo en cola. Esa verificación aparece resuelta en la segunda sección del cuaderno adjunto y garantiza que las diferencias que se observen más adelante provienen de los datos y no de un error de formulación.
+
+\subsection{Diseño experimental}
+
+Se definieron dos escenarios idénticos en todo salvo en la longitud de la corrida:
+
+\begin{itemize}[itemsep=2pt]
+    \item \textbf{Escenario A}: 10 corridas de 20 clientes cada una.
+    \item \textbf{Escenario B}: 10 corridas de 200 clientes cada una.
+\end{itemize}
+
+En ambos se calcularon las cinco medidas de desempeño por corrida y, sobre las diez repeticiones, la media muestral, la desviación estándar muestral, la media anchura y los intervalos de confianza al 95\,\% y al 99\,\%. Mantener fijo todo lo demás es lo que permite atribuir las diferencias observadas exclusivamente al número de clientes atendidos.
+
+% =====================================================
+\section{Escenario A: simulación con 20 clientes}
+% =====================================================
+
+\subsection{Generación de valores aleatorios y tabla de la simulación}
+
+La Tabla~\ref{tab:sim20} presenta completa la primera de las diez corridas. Las columnas (2) y (4) contienen los valores sorteados; las siete restantes se obtuvieron aplicando fila por fila las recurrencias de la sección anterior. El primer cliente no tiene tiempo entre llegadas ---llega en el instante cero, que es el origen del reloj de simulación--- y por eso esa celda aparece vacía.
+
+\input{tbl20.tex}
+
+Vale la pena seguir un par de filas para ver el mecanismo en acción. El cliente 7 llega en el minuto 38, cuando el cajero todavía está atendiendo al cliente 6 hasta el minuto 39; su atención empieza entonces un minuto más tarde que su llegada, y ese minuto aparece en la columna (9). El caso opuesto ocurre entre los clientes 4 y 5: el servidor queda libre en el minuto 21 y el siguiente cliente no aparece hasta el 28, de modo que la columna (8) registra 7 minutos de inactividad. El cliente 16 concentra el peor momento de la corrida: llega en el minuto 77, espera 4 minutos porque hay dos personas delante y su servicio dura 6, con lo que permanece 10 minutos en el sistema, el máximo de la tabla.
+
+\subsection{Medidas de desempeño}
+
+Con los totales de las columnas (7), (8) y (9) de la corrida anterior se calcularon las cinco medidas, cuyo detalle aritmético aparece en la Tabla~\ref{tab:meas20}.
+
+\input{meas20.tex}
+
+\paragraph{¿Qué se puede interpretar de estos resultados?}
+
+\begin{itemize}[itemsep=3pt]
+    \item \textbf{Tiempo promedio en el sistema (4,15 min).} Un cliente cualquiera permaneció en el banco algo más de cuatro minutos entre que llegó y salió atendido. Ese tiempo se descompone en dos partes: 3,30 minutos de atención efectiva (los 66 minutos de servicio de la columna (4) repartidos entre los 20 clientes) y 0,85 minutos de espera. Es decir, cuatro quintas partes de la permanencia son servicio y solo una quinta parte es cola.
+    \item \textbf{Porcentaje de tiempo ocioso (41,07\,\%).} De los 112 minutos que duró la corrida, el cajero pasó 46 sin atender a nadie. Es una cifra alta que confirma que el cuello de botella del sistema no está en la capacidad del servidor, sino en lo espaciadas que llegan las personas.
+    \item \textbf{Espera promedio por cliente (0,85 min).} Repartiendo los 17 minutos totales de cola entre los 20 clientes, cada uno esperó en promedio menos de un minuto. Tomada aisladamente, esta cifra da una impresión demasiado optimista del sistema.
+    \item \textbf{Fracción de clientes que esperó (0,30).} Solo 6 de los 20 clientes encontraron ocupado al cajero. Los otros 14 pasaron directo.
+    \item \textbf{Espera promedio de quienes esperaron (2,83 min).} Aquí está el matiz que corrige la impresión anterior: quien tuvo que hacer fila esperó en promedio 2,83 minutos, más del triple del promedio general. La espera no se distribuye de manera pareja, se concentra en una minoría de clientes.
+\end{itemize}
+
+La lectura conjunta es la interesante: el sistema está holgado ---el servidor está libre buena parte del tiempo--- y sin embargo, cuando la congestión aparece, es perceptible para el cliente que la sufre. Esa aparente contradicción es característica de los sistemas de espera y se explica porque las llegadas no están repartidas de manera uniforme en el tiempo, sino que se agrupan por azar.
+
+\subsection{Repetición de la simulación: diez corridas}
+
+Se repitió diez veces el procedimiento completo, sorteando en cada ocasión valores nuevos de las dos variables aleatorias. La Tabla~\ref{tab:runs20} reúne las medidas de desempeño de cada corrida.
+
+\input{runs20.tex}
+
+\paragraph{¿Qué se puede decir de los resultados? ¿Qué similitudes y diferencias aparecen?}
+
+Lo que primero salta a la vista es la \textbf{dispersión}. El tiempo promedio en el sistema va de 3,30 minutos en la corrida 4 a 6,90 en la corrida 7: un rango de 3,6 minutos, comparable en magnitud al propio promedio. La espera promedio por cliente es todavía más inestable, con valores entre 0,35 y 3,20 minutos, es decir, una corrida casi diez veces peor que otra. La fracción que esperó oscila entre 0,15 y 0,60.
+
+La corrida 7 merece un comentario aparte porque ilustra bien el fenómeno: allí coincidieron por azar varios tiempos entre llegadas cortos con tiempos de servicio largos, se formó una cola que no alcanzó a disolverse y las cinco medidas se dispararon simultáneamente. No es un error, es exactamente el tipo de escenario que la simulación existe para revelar.
+
+Lo que sí se mantiene estable son las \textbf{relaciones estructurales} entre medidas. En las diez corridas, sin excepción, la espera de quienes esperaron supera a la espera promedio general, y el tiempo ocioso permanece siempre entre el 21\,\% y el 47\,\%. Es decir, el comportamiento cualitativo del sistema se repite; lo que varía de manera importante son los valores numéricos.
+
+De ahí la conclusión metodológica: reportar una sola corrida como si fuera \guillemotleft el resultado\guillemotright{} de la simulación sería engañoso. Habría bastado con presentar la corrida 4 o la 7 para dar dos retratos casi opuestos del mismo banco. Hace falta repetir el experimento y cuantificar la incertidumbre, que es justamente lo que hace la sección siguiente.
+
+\subsection{Intervalos de confianza}
+\label{sec:ic20}
+
+Siguiendo el procedimiento de la subsección 1.11.1 y el Ejemplo 2 del Capítulo 1 de \cite{Banks1998}, se tomó cada columna de la Tabla~\ref{tab:runs20} como una muestra de $n = 10$ observaciones independientes. A modo de ejemplo desarrollado paso a paso, se detalla el cálculo para el tiempo promedio en el sistema.
+
+\vspace{4pt}
+\noindent\fbox{\parbox{0.97\textwidth}{
+\textbf{Cálculo detallado --- tiempo promedio en el sistema, 20 clientes}
+\vspace{4pt}
+
+\textbf{Paso 1.} Media muestral de las diez corridas:
+\[
+\bar{X} = \frac{4{,}15 + 3{,}45 + 4{,}15 + 3{,}30 + 4{,}90 + 5{,}50 + 6{,}90 + 5{,}70 + 4{,}75 + 3{,}80}{10} = 4{,}6600 \ \text{min}
+\]
+
+\textbf{Paso 2.} Desviación estándar muestral, con divisor $n-1 = 9$:
+\[
+S = \sqrt{\frac{1}{9}\sum_{i=1}^{10}\left(X_i - 4{,}66\right)^2} = 1{,}1276 \ \text{min}
+\]
+
+\textbf{Paso 3.} Valor crítico de la distribución $t$ con $9$ grados de libertad, para $\alpha = 0{,}05$:
+\[
+t_{9,\,0{,}975} = 2{,}2622
+\]
+
+\textbf{Paso 4.} Media anchura del intervalo:
+\[
+h = t_{9,\,0{,}975}\,\frac{S}{\sqrt{n}} = 2{,}2622 \times \frac{1{,}1276}{\sqrt{10}} = 2{,}2622 \times 0{,}3566 = 0{,}8067
+\]
+
+\textbf{Paso 5.} Intervalo de confianza al 95\,\%:
+\[
+\left(\bar{X} - h,\ \bar{X} + h\right) = \left(4{,}6600 - 0{,}8067,\ 4{,}6600 + 0{,}8067\right) = \left(3{,}8533,\ 5{,}4667\right)
+\]
+
+\textbf{Paso 6.} Repitiendo con $\alpha = 0{,}01$, es decir $t_{9,\,0{,}995} = 3{,}2498$:
+\[
+h = 3{,}2498 \times 0{,}3566 = 1{,}1589 \qquad\Longrightarrow\qquad \left(3{,}5011,\ 5{,}8189\right)
+\]
+}}
+\vspace{6pt}
+
+Aplicando el mismo procedimiento a las cinco medidas se obtiene la Tabla~\ref{tab:ci20}.
+
+\input{ci20.tex}
+
+\paragraph{¿Qué se puede decir de la media y la desviación estándar muestral de cada medida?}
+
+Las medias resumen razonablemente bien el comportamiento del sistema: un cliente pasa en promedio 4,66 minutos en el banco, el cajero está ocioso el 34,91\,\% del tiempo y aproximadamente uno de cada tres clientes (0,35) tiene que esperar. El problema no está en las medias sino en las desviaciones estándar que las acompañan.
+
+Comparadas con su respectiva media, las $S$ obtenidas son grandes. El caso más severo es la espera promedio por cliente, con $S = 0{,}8430$ frente a $\bar{X} = 1{,}1750$: la dispersión equivale al 72\,\% de la media. Le siguen la fracción que esperó (41\,\%) y la espera de quienes esperaron (33\,\%). Las medidas más estables son el tiempo en el sistema y el porcentaje ocioso, ambas alrededor del 25\,\%. Esto tiene una explicación: las medidas que se calculan sobre los 20 clientes de la corrida promedian más observaciones que las que se calculan solo sobre los pocos clientes que esperaron ---en la corrida 1 fueron apenas 6---, y menos observaciones significa más ruido.
+
+\paragraph{¿Qué análisis se puede hacer de los intervalos al 95\,\% y al 99\,\%?}
+
+Los intervalos resultan \textbf{demasiado anchos para ser útiles en la práctica}. El del tiempo promedio en el sistema al 95\,\% va de 3,85 a 5,47 minutos: una amplitud de 1,61 minutos sobre una media de 4,66, es decir, un margen de $\pm 17{,}3\,\%$. El de la espera promedio por cliente es directamente inservible, pues abarca de 0,57 a 1,78 minutos, un margen de $\pm 51{,}3\,\%$ que impide afirmar casi nada con precisión.
+
+Al pasar del 95\,\% al 99\,\% de confianza, todos los intervalos se ensanchan en la misma proporción, exactamente $3{,}2498 / 2{,}2622 = 1{,}437$, porque la única cantidad que cambia en la fórmula es el valor crítico $t$. En el tiempo promedio en el sistema la amplitud crece de 1,61 a 2,32 minutos. Esto ilustra el compromiso central de la estimación por intervalos: mayor seguridad de estar en lo cierto se paga con menor precisión en la afirmación. Un intervalo del 99\,\% acierta más veces, pero dice menos.
+
+La lección de este escenario es que diez corridas de 20 clientes no alcanzan. Se puede atacar el problema por dos vías: aumentando el número de repeticiones $n$ o alargando cada corrida. La guía propone explorar la segunda, que es lo que se hace a continuación.
+
+% =====================================================
+\section{Escenario B: simulación con 200 clientes}
+% =====================================================
+
+\subsection{Generación de valores aleatorios y tabla de la simulación}
+
+Se repitió íntegramente el procedimiento anterior, con la única diferencia de atender 200 clientes por corrida en lugar de 20. Se conservaron las distribuciones ($U\{1,10\}$ y $U\{1,6\}$), el número de repeticiones (diez) y los niveles de confianza. La Tabla~\ref{tab:sim200} presenta completa la primera corrida.
+
+\input{tbl200.tex}
+
+La corrida se extendió por 1088 minutos ---algo más de 18 horas de operación--- durante los cuales se acumularon 941 minutos de permanencia en el sistema, 391 de inactividad del servidor y 244 de espera en cola. Con diez veces más clientes, también aparecen situaciones que la corrida corta no alcanzó a mostrar: la cola más larga registrada hizo esperar 9 minutos a un cliente, frente a un máximo de 4 minutos en el escenario de 20 clientes.
+
+\subsection{Medidas de desempeño}
+
+\input{meas200.tex}
+
+\paragraph{¿Qué se puede interpretar de estos resultados?}
+
+\begin{itemize}[itemsep=3pt]
+    \item \textbf{Tiempo promedio en el sistema (4,71 min).} El valor es del mismo orden que el del escenario A, pero ahora está respaldado por 200 observaciones en lugar de 20, de modo que describe mucho mejor el comportamiento habitual del sistema y no un episodio particular.
+    \item \textbf{Porcentaje de tiempo ocioso (35,94\,\%).} Esta cifra es notable: prácticamente coincide con el valor teórico $1 - \rho = 36{,}36\,\%$ deducido en la ecuación~\eqref{eq:rho}. La corrida larga permitió que la proporción observada convergiera a la que predice la teoría, algo que no ocurría con 20 clientes.
+    \item \textbf{Espera promedio por cliente (1,22 min) y fracción que esperó (0,37).} Ambas resultaron algo más altas que en la corrida corta del escenario A. No hay contradicción: la corrida de 20 clientes simplemente había tenido suerte. Con 200 clientes hay más ocasiones para que se formen aglomeraciones y estas alcanzan a manifestarse en el promedio.
+    \item \textbf{Espera promedio de quienes esperaron (3,30 min).} Se confirma el patrón del escenario anterior: 74 de los 200 clientes hicieron fila, y para ellos la espera fue casi tres veces el promedio general. El sistema sigue siendo desigual con sus usuarios, y esa desigualdad se sostiene al alargar la observación.
+\end{itemize}
+
+\subsection{Repetición de la simulación: diez corridas}
+
+\input{runs200.tex}
+
+\paragraph{¿Qué se puede decir de los resultados? ¿Qué similitudes y diferencias aparecen?}
+
+La diferencia con la Tabla~\ref{tab:runs20} es contundente. El tiempo promedio en el sistema ahora se mueve entre 4,11 y 5,05 minutos ---un rango de 0,95 minutos--- frente a los 3,6 minutos de rango que se observaron con 20 clientes: la variación entre corridas se redujo a poco más de la cuarta parte. El porcentaje de tiempo ocioso se concentra entre 32,65\,\% y 41,13\,\%, siempre rondando el 36\,\% teórico, mientras que antes llegaba a bajar al 20,95\,\%. Ya no hay corridas atípicas como la número 7 del escenario A.
+
+La similitud, en cambio, está en las medias: 4,60 minutos en el sistema aquí frente a 4,66 allá; 3,11 minutos de espera para quienes esperaron en ambos escenarios, con una diferencia de apenas una milésima. Y esto es exactamente lo que debía ocurrir. Alargar la corrida \textbf{no cambia el sistema} ---las distribuciones de llegada y de servicio son las mismas--- de modo que el valor esperado de cada medida no tiene por qué moverse. Lo que cambia es la precisión con que ese valor se estima. Dicho de otro modo: los dos escenarios apuntan al mismo blanco, pero el de 200 clientes tiene mejor puntería.
+
+La Figura~\ref{fig:dispersion} muestra esta idea de un vistazo.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_dispersion.pdf}
+\caption{Tiempo promedio en el sistema obtenido en cada una de las diez corridas de cada escenario. Los dos conjuntos de puntos se centran prácticamente en el mismo lugar, pero el de 200 clientes está mucho más concentrado, lo que produce un intervalo de confianza notablemente más estrecho.}
+\label{fig:dispersion}
+\end{figure}
+
+\subsection{Intervalos de confianza}
+
+\input{ci200.tex}
+
+\paragraph{¿Qué se puede decir de la media y la desviación estándar muestral de cada medida?}
+
+Las medias apenas se movieron respecto del escenario A, pero las desviaciones estándar cayeron en todas las medidas sin excepción. La del tiempo promedio en el sistema pasó de $1{,}1276$ a $0{,}2642$; la de la espera promedio por cliente, de $0{,}8430$ a $0{,}2428$; la del porcentaje ocioso, de $0{,}0910$ a $0{,}0282$. Son reducciones de entre el 62\,\% y el 77\,\%.
+
+Hay un detalle que vale la pena señalar. Si las medidas de cada corrida fueran promedios de observaciones independientes, multiplicar por diez la longitud de la corrida debería dividir la desviación estándar por $\sqrt{10} = 3{,}162$. Las razones $S_{20}/S_{200}$ efectivamente obtenidas son 4,27 (tiempo en el sistema), 3,23 (tiempo ocioso), 3,47 (espera por cliente), 2,66 (fracción que esperó) y 3,49 (espera de quienes esperaron): todas se agrupan alrededor de ese 3,16 teórico. La coincidencia no es exacta ---y no tenía por qué serlo, porque los tiempos de espera de clientes consecutivos están correlacionados entre sí y porque diez corridas son pocas para estimar bien una desviación estándar--- pero confirma que el mecanismo que reduce la incertidumbre es el esperado.
+
+\paragraph{¿Qué análisis se puede hacer de los intervalos al 95\,\% y al 99\,\%?}
+
+Los intervalos ahora sí resultan informativos. El del tiempo promedio en el sistema al 95\,\% va de 4,41 a 4,79 minutos: una amplitud de 0,38 minutos, apenas 23 segundos, contra los 1,61 minutos del escenario A. En términos relativos el margen bajó de $\pm 17{,}3\,\%$ a $\pm 4{,}1\,\%$. El del porcentaje de tiempo ocioso, entre 34,05\,\% y 38,08\,\%, contiene al valor teórico de 36,36\,\% y es lo bastante estrecho como para afirmar con seguridad que el cajero está desocupado alrededor de un tercio de la jornada.
+
+Incluso la medida más problemática mejoró de manera sustancial: la espera promedio por cliente pasó de un margen de $\pm 51{,}3\,\%$ a uno de $\pm 15{,}6\,\%$. Sigue siendo la menos precisa de las cinco, lo cual es coherente, ya que es la que más depende de eventos poco frecuentes.
+
+El paso del 95\,\% al 99\,\% conserva el mismo factor de 1,437 del escenario anterior ---no podía ser de otro modo, porque $n$ es igual en ambos---, pero ahora ese ensanchamiento se aplica sobre intervalos mucho más angostos y sale mucho más barato: el del tiempo en el sistema crece de 0,38 a 0,54 minutos y sigue siendo estrecho. Ahí está la ventaja práctica de trabajar con corridas largas: permite exigir un nivel de confianza alto sin sacrificar precisión útil.
+
+% =====================================================
+\section{Comparación de los dos escenarios}
+% =====================================================
+
+La Tabla~\ref{tab:resumen} confronta directamente las desviaciones estándar muestrales y los rangos de intervalo ($2h$) de los dos escenarios en los dos niveles de confianza.
+
+\input{resumen.tex}
+
+Como las cinco medidas están expresadas en unidades distintas ---minutos unas, proporciones otras--- comparar sus $S$ entre sí sería tramposo: favorecería automáticamente a las que se miden en una escala más pequeña. La Tabla~\ref{tab:cv} corrige eso presentando la dispersión y la precisión en términos relativos, que son adimensionales y sí admiten comparación cruzada.
+
+\input{cv.tex}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{fig_precision.pdf}
+\caption{Semiamplitud relativa del intervalo de confianza al 95\,\% para cada medida de desempeño. Al pasar de 20 a 200 clientes por corrida, el margen de error se reduce a aproximadamente la tercera parte en las cinco medidas.}
+\label{fig:precision}
+\end{figure}
+
+\subsection{¿Cuál combinación de número de clientes, repeticiones y porcentaje de confianza tiene la menor desviación estándar muestral y el menor rango de intervalo?}
+
+Leyendo la Tabla~\ref{tab:resumen} en términos absolutos, la respuesta es la combinación de \textbf{200 clientes por corrida, 10 repeticiones y 95\,\% de confianza} aplicada al \textbf{porcentaje de tiempo ocioso}, que registra a la vez la menor desviación estándar muestral de toda la tabla ($S = 0{,}0282$) y el menor rango de intervalo ($2h = 0{,}0403$).
+
+Conviene, sin embargo, matizar esa lectura. Que el porcentaje de tiempo ocioso encabece la lista se debe en buena medida a que es una proporción acotada entre 0 y 1, mientras que las demás medidas se expresan en minutos y toman valores del orden de la unidad o mayores. Al mirar la Tabla~\ref{tab:cv}, que elimina el efecto de las unidades, la medida más precisa en términos relativos resulta ser el tiempo promedio en el sistema, con un margen de apenas $\pm 4{,}1\,\%$ frente al $\pm 5{,}6\,\%$ del tiempo ocioso.
+
+Lo verdaderamente robusto ---y que se cumple con cualquiera de los dos criterios--- es la conclusión sobre los factores:
+
+\begin{enumerate}[itemsep=3pt]
+    \item \textbf{La longitud de la corrida es el factor dominante.} Para las cinco medidas, sin excepción, 200 clientes producen menor $S$ y menor rango que 20 clientes. La mejora oscila entre el 62\,\% y el 77\,\% y no depende del nivel de confianza elegido.
+    \item \textbf{El nivel de confianza actúa como un multiplicador fijo.} Con $n = 10$ corridas, pasar del 95\,\% al 99\,\% ensancha todo intervalo en un factor de 1,437, siempre. No altera $S$, que es una propiedad de los datos y no de la decisión estadística.
+    \item \textbf{El número de repeticiones no se varió, pero su efecto es predecible.} La fórmula $h = t\,S/\sqrt{n}$ indica que reducir $h$ a la mitad manteniendo la corrida corta exigiría cuadruplicar $n$, es decir, pasar de 10 a 40 corridas. En este experimento resultó más económico alargar las corridas que multiplicarlas.
+\end{enumerate}
+
+En síntesis, la combinación óptima es \textbf{corridas largas con el menor nivel de confianza que resulte aceptable} para la decisión que se quiera tomar. Y aquí conviene una advertencia: el intervalo más estrecho no es automáticamente el mejor. Un intervalo del 95\,\% es más angosto que uno del 99\,\% simplemente porque acepta equivocarse una de cada veinte veces en lugar de una de cada cien. La estrechez solo es una virtud cuando proviene de reducir la variabilidad ---como al pasar de 20 a 200 clientes---, no cuando proviene de rebajar la exigencia de confianza.
+
+% =====================================================
+\section{Conclusiones}
+% =====================================================
+
+\begin{enumerate}[itemsep=4pt]
+    \item La simulación \emph{ad hoc} de un sistema de cola simple reproduce, con aritmética elemental y dos variables aleatorias uniformes discretas, el comportamiento esencial de un sistema de espera real. Las seis recurrencias del modelo bastan para generar las nueve columnas de la tabla y, a partir de ellas, las cinco medidas de desempeño.
+
+    \item Los resultados de una única corrida no permiten caracterizar el sistema. En el escenario de 20 clientes, corridas ejecutadas bajo condiciones idénticas arrojaron tiempos promedio en el sistema que iban de 3,30 a 6,90 minutos. Presentar cualquiera de ellas como \guillemotleft el resultado\guillemotright{} habría sido tan defendible como arbitrario.
+
+    \item Alargar la corrida de 20 a 200 clientes no modificó las medias estimadas ---4,66 frente a 4,60 minutos en el sistema--- pero redujo las desviaciones estándar muestrales entre un 62\,\% y un 77\,\%. Las razones de reducción observadas se agruparon en torno al valor $\sqrt{10} = 3{,}162$ que predice la teoría, lo que confirma que la ganancia de precisión proviene de promediar más observaciones y no de un cambio en el sistema simulado.
+
+    \item Los intervalos de confianza cuantifican esa ganancia de manera directa. El margen relativo del tiempo promedio en el sistema pasó de $\pm 17{,}3\,\%$ con 20 clientes a $\pm 4{,}1\,\%$ con 200, y el de la espera promedio por cliente ---la medida más ruidosa--- de $\pm 51{,}3\,\%$ a $\pm 15{,}6\,\%$.
+
+    \item El nivel de confianza no aporta información nueva, solo redistribuye el compromiso entre certeza y precisión: con diez repeticiones, exigir 99\,\% en lugar de 95\,\% ensancha todo intervalo en un factor constante de 1,437.
+
+    \item La simulación reprodujo los valores teóricos del modelo. El porcentaje de tiempo ocioso promedio con 200 clientes fue de 36,07\,\%, frente al 36,36\,\% que predice la utilización $\rho = E[S]/E[A]$, y el intervalo al 95\,\% de esa medida contiene el valor teórico. Esta coincidencia funciona como validación independiente de todo el procedimiento.
+
+    \item Desde el punto de vista práctico, el sistema simulado está sobredimensionado: el cajero permanece desocupado cerca de un tercio de su jornada mientras que solo el 35\,\% de los clientes espera, y en promedio poco más de tres minutos. Sin embargo, la sola comparación de las dos medidas de espera revela que el costo de la congestión no se distribuye de manera uniforme, sino que recae concentrado sobre una minoría de usuarios. Una decisión gerencial basada únicamente en el promedio general subestimaría el problema.
+\end{enumerate}
+
+% =====================================================
+\section{Anexos}
+% =====================================================
+
+Se adjuntan a este informe los archivos con los datos registrados y ejecutados:
+
+\begin{itemize}[itemsep=3pt]
+    \item \texttt{fila\_banco\_20\_clientes.xlsx} --- hoja \guillemotleft Ejemplo\guillemotright{} con la tabla completa de la simulación de 20 clientes y las medidas de desempeño calculadas mediante fórmulas, y hoja \guillemotleft 10 runs\guillemotright{} con los resultados de las diez corridas, su media, su desviación estándar y los intervalos de confianza.
+    \item \texttt{fila\_banco\_200\_clientes.xlsx} --- misma estructura, para el escenario de 200 clientes.
+    \item \texttt{Confidence\_intervals\_20\_200.ipynb} --- cuaderno de Google Colab, adaptado del cuaderno \texttt{Confidence intervals.ipynb} suministrado en la guía. Contiene el motor de simulación, la verificación contra la Tabla 1.1 de \cite{Banks1998}, la generación de las corridas de ambos escenarios y el cálculo de los intervalos de confianza al 95\,\% y 99\,\% presentado con el mismo formato del Ejemplo 2 de la subsección 1.11.1. El cuaderno se entrega ya ejecutado y, gracias a la semilla fija, reproduce exactamente las tablas de este informe.
+\end{itemize}
+
+% =====================================================
+\begin{thebibliography}{9}
+\bibitem{Banks1998}
+Banks, J. (1998). \emph{Handbook of Simulation: Principles, Methodology, Advances, Applications, and Practice}. John Wiley \& Sons, Inc. Capítulo 1.
+\end{thebibliography}
+
+\end{document}

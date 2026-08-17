@@ -1,0 +1,20 @@
+\begin{table}[H]
+\centering
+\caption{Verificaci\'on de los generadores: prueba $\chi^2$ de bondad de ajuste a la distribuci\'on uniforme discreta.}
+\label{tab:valgen}
+\footnotesize
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+Escenario & Variable & \makecell{Valores\\generados} & \makecell{Media\\observada} & \makecell{Media\\te\'orica} & $\chi^2$ & valor $p$ \\
+\midrule
+20 clientes & Tiempo entre llegadas $\sim U\{1,10\}$ & 190 & 5.405 & 5.500 & 8.211 & 0.513 \\
+ & Tiempo de servicio $\sim U\{1,6\}$ & 200 & 3.485 & 3.500 & 7.420 & 0.191 \\
+\addlinespace
+200 clientes & Tiempo entre llegadas $\sim U\{1,10\}$ & 1990 & 5.466 & 5.500 & 4.784 & 0.853 \\
+ & Tiempo de servicio $\sim U\{1,6\}$ & 2000 & 3.489 & 3.500 & 6.028 & 0.304 \\
+\bottomrule
+\end{tabular}
+\begin{minipage}{\textwidth}\vspace{2pt}\footnotesize
+Hip\'otesis nula: los valores provienen de la distribuci\'on uniforme discreta indicada. Con $p>0{,}05$ en los cuatro casos no hay evidencia para rechazarla.
+\end{minipage}
+\end{table}

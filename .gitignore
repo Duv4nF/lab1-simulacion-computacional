@@ -1,0 +1,27 @@
+# Trabajo de terceros: no se publica
+lab amigo ej/
+
+# Archivos auxiliares de LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.xdv
+*.bbl
+*.blg
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Temporales de ofimática y del sistema
+~$*
+.DS_Store
+Thumbs.db
+desktop.ini

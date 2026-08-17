@@ -1,0 +1,69 @@
+ENTREGA - PRÁCTICA N.º 01: SIMULACIÓN AD HOC
+Laboratorio de Simulación Computacional - Universidad de los Llanos
+===================================================================
+
+CONTENIDO
+---------
+
+  Informe_Practica1_Simulacion_AdHoc.pdf
+      Informe completo ya compilado (24 páginas). Es el entregable principal.
+
+  Informe_LaTeX/
+      Código fuente LaTeX del informe. Listo para subir a Overleaf.
+        main.tex ......... documento principal (aquí se edita el texto)
+        tbl20/200.tex .... tablas de la simulación detallada
+        meas20/200.tex ... tablas de medidas de desempeño
+        runs20/200.tex ... tablas de las 10 corridas
+        ci20/200.tex ..... tablas de intervalos de confianza
+        resumen.tex ...... comparación 20 vs 200 clientes
+        cv.tex ........... precisión relativa
+        valgen.tex ....... verificación chi-cuadrado de los generadores
+        fig_dispersion.pdf, fig_precision.pdf ... figuras
+
+  fila_banco_20_clientes.xlsx
+  fila_banco_200_clientes.xlsx
+      Hoja "Ejemplo": tabla completa de la simulación con las 9 columnas y las
+      medidas de desempeño calculadas CON FÓRMULAS (no valores pegados).
+      Hoja "10 runs": las 10 corridas, media, desviación estándar muestral,
+      valores t, media anchura e intervalos al 95 % y 99 %, también con fórmulas.
+
+  Confidence_intervals_20_200.ipynb
+      Cuaderno de Google Colab, ya ejecutado y con las salidas guardadas.
+      Adaptado del cuaderno Confidence_intervals.ipynb de la guía.
+
+
+ANTES DE ENTREGAR
+-----------------
+
+1. Abra Informe_LaTeX/main.tex y edite las tres primeras líneas útiles:
+
+       \newcommand{\nombreEstudiante}{Duván Felipe [apellidos]}
+       \newcommand{\codigoEstudiante}{[código estudiantil]}
+
+   Reemplace los textos entre corchetes por sus datos reales.
+
+2. Recompile para que la portada quede con sus datos.
+
+
+CÓMO COMPILAR EN OVERLEAF
+-------------------------
+
+1. Comprima la carpeta Informe_LaTeX en un .zip
+   (o use el archivo Informe_LaTeX_Overleaf.zip que ya viene incluido).
+2. Entre a overleaf.com -> New Project -> Upload Project -> seleccione el .zip
+3. Asegúrese de que main.tex esté marcado como documento principal.
+4. Presione Recompile.
+
+El preámbulo está preparado para funcionar tanto con pdfLaTeX (opción por
+defecto de Overleaf) como con XeLaTeX o LuaLaTeX.
+
+
+NOTA SOBRE LOS DATOS
+--------------------
+
+Todos los valores aleatorios se generaron con una semilla fija (SEED = 20260817),
+de modo que el cuaderno de Colab reproduce exactamente las mismas tablas del
+informe y de los archivos de Excel. Si desea generar un conjunto de datos
+distinto, cambie el valor de SEED en la primera celda de código del cuaderno y
+vuelva a ejecutarlo por completo; tenga en cuenta que en ese caso deberá
+actualizar también las cifras citadas en el texto del informe.
