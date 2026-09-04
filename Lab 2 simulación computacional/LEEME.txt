@@ -1,0 +1,63 @@
+LABORATORIO N.o 02 - NUMEROS (PSEUDO)ALEATORIOS Y GENERACION DE VARIABLES ALEATORIAS
+Simulacion Computacional - Universidad de los Llanos
+Duvan Felipe Baquero - Codigo 160005002
+Guia FO-DOC-112, Practica N.o 02
+
+-------------------------------------------------------------------------------
+QUE SE ENTREGA
+-------------------------------------------------------------------------------
+
+  Informe_Practica2_Numeros_Aleatorios.pdf
+      Informe de 18 paginas compilado desde LaTeX. Es el documento principal.
+
+  Lab2_Simulacion_Duvan_Baquero_160005002.ipynb
+      Cuaderno de Jupyter en Python ejecutado de principio a fin, con el
+      desarrollo completo de los numerales 5.1, 5.2, 5.3 y 5.4. 78 celdas.
+
+  Informe_LaTeX/
+      Fuente del informe: main.tex, las ocho tablas .tex y las tres figuras .pdf.
+
+  Informe_LaTeX_Overleaf.zip
+      El mismo contenido de Informe_LaTeX listo para subir a Overleaf.
+      Se sube el ZIP completo y se compila main.tex. Funciona con pdfLaTeX,
+      XeLaTeX y LuaLaTeX.
+
+  Entrega_Lab2_160005002.zip
+      El PDF y el cuaderno juntos, para subir a la plataforma en un solo archivo.
+
+-------------------------------------------------------------------------------
+QUE CONTIENE CADA NUMERAL
+-------------------------------------------------------------------------------
+
+  5.1  MidSquare con las cinco semillas de la guia, congruencial mixto con los
+       cinco juegos de parametros, y otros dos generadores (shift-register y
+       congruencia inversa). Para las doce secuencias: tamano de ciclo, prueba
+       de uniformidad (Kolmogorov-Smirnov y chi-cuadrado) y prueba de
+       aleatoriedad (rachas), mas la respuesta a cuales son los peores y los
+       mejores generadores.
+
+  5.2  Ejercicios 3 a 9 de la seccion 3.2 del capitulo 3 de Ross, estimados por
+       Monte Carlo con k = 100, 1000, 10 000 y 100 000 numeros aleatorios y
+       comparados contra el valor exacto.
+
+  5.3  Literales a), b), c) y d). Transformada inversa discreta con el generador
+       X0 = 2391, a = 25214903917, c = 11, m = 2^48, y metodo de composicion
+       para el literal d).
+
+  5.4  Simulacion ad hoc de 20 clientes repitiendo las secciones 5.1 y 5.2 del
+       Laboratorio 1, con tiempos entre llegadas Poisson(lambda = 10) y tiempos
+       de servicio Binomial(n = 10, p = 0.40), mas la comparacion contra el
+       modelo del Laboratorio 1.
+
+-------------------------------------------------------------------------------
+NOTAS
+-------------------------------------------------------------------------------
+
+  * Todos los generadores estan implementados a mano siguiendo los algoritmos de
+    los capitulos 3 y 4 de Ross. De scipy solo se usan valores criticos,
+    funciones de masa teoricas y una cuadratura numerica de referencia.
+
+  * Las semillas estan fijas en el codigo, asi que cualquier ejecucion del
+    cuaderno reproduce exactamente las mismas tablas del informe.
+
+  * El cuaderno corre tal cual en Google Colab, sin instalar nada.
