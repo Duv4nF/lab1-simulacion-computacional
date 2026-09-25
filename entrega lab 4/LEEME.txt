@@ -1,0 +1,33 @@
+LABORATORIO N.o 04 - GENERACION DE VARIABLES ALEATORIAS CONTINUAS
+Simulacion Computacional - Universidad de los Llanos
+Duvan Felipe Baquero - Codigo 160005002
+Guia FO-DOC-112, Practica N.o 04
+
+QUE SE ENTREGA
+
+  Lab4_160005002.ipynb
+      Cuaderno de Jupyter ejecutado de principio a fin: objetivos, consulta
+      previa, fundamento teorico y numerales 5.1, 5.2 y 5.3.
+
+  Informe_Practica4_VA_Continuas.pdf
+      Informe de 15 paginas compilado desde LaTeX.
+
+  Informe_LaTeX/  e  Informe_LaTeX_Overleaf.zip
+      Fuente del informe (main.tex y figuras). Para Overleaf se sube el ZIP y
+      se compila main.tex.
+
+  Entrega_Lab4_160005002.zip
+      El cuaderno y el PDF juntos, para subir a la plataforma.
+
+CONTENIDO
+
+  5.1  a) inversa, b) rechazo (y inversa para comparar), c) inversa,
+       d) Weibull con tres pares (alfa, beta). 1000 valores, histograma
+       contra densidad teorica y prueba KS en cada caso. Ademas exponencial,
+       Gamma y normal (metodo polar), que piden los objetivos.
+  5.2  a) proceso de Poisson en [0, T]; b) variable de Coxian.
+  5.3  Poisson no homogeneo en [0, 10] por adelgazamiento y por subintervalos.
+
+  Numeros uniformes: congruencial mixto a = 25214903917, c = 11, m = 2^48,
+  validado con KS, chi-cuadrado y rachas. Semillas fijas: el cuaderno
+  reproduce siempre las mismas cifras. Corre en Google Colab sin instalar nada.
