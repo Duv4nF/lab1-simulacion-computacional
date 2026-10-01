@@ -1,0 +1,22 @@
+LABORATORIO 4 - SIMULACION DE EVENTOS DISCRETOS
+Simulacion Computacional - Universidad de los Llanos
+Duvan Felipe Baquero - Codigo 160005002
+Guia FO-DOC-112 (Practica N.o 03)
+
+CONTENIDO
+
+  Informe_Lab4_EventosDiscretos_160005002.pdf
+      Informe compilado desde LaTeX (secciones 5.1 a 5.5).
+
+  Lab4_5.1_GG1_160005002.ipynb        Linea de espera G/G/1, escenarios A y B, 10 corridas
+  Lab4_5.2_RedColas_160005002.ipynb   Red de colas, escenarios A y B, 20 repeticiones e IC 95 %
+  Lab4_5.3_Inventario_160005002.ipynb Inventario probabilistico (seccion 5.6 de Rios08)
+  Lab4_5.4_SimPy_160005002.ipynb      Tutoriales de SimPy y los 7 ejemplos de la guia
+      Todos ejecutados de principio a fin; corren en Google Colab.
+
+  Informe_LaTeX/
+      main.tex, tablas/, figuras/ (generadas por los cuadernos) y capturas/ (AnyLogic).
+      Para Overleaf se sube la carpeta completa y se compila main.tex.
+
+  Modelos_AnyLogic/
+      Modelos .alp de los tutoriales de AnyLogic 8.9 PLE (numeral 5.5), por fase.
