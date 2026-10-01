@@ -1184,7 +1184,28 @@ tiempo y el operario del ensamble el 35\,\%. En la fase 5 los montacargas bajaro
 94\,\%: con la línea completa, el ensamble de bloques se vuelve el cuello de botella, mientras que los montacargas
 tienen capacidad de sobra. Si se quisiera producir más baterías, el primer cambio sería un segundo operario en el
 ensamble, no más montacargas.
-\captura{al_bat_f8.png}{Lead acid battery, fases 7 y 8: modelo completo en 3D.}
+\captura{al_bat_f6.png}{Lead acid battery, fase 6: entrega de las baterías a la zona de carga con AGV.}
+\captura{al_bat_f8.png}{Lead acid battery, fases 7 y 8: ánodos y cátodos preparados por separado con el bloque
+personalizado \texttt{PrepareElectrode} y modelo completo en 3D.}
+
+En la fase 6 las baterías ya no terminan al salir de la línea: una grúa las pone en la zona de carga
+(\texttt{toLoadingArea}) y un AGV que sigue una ruta guiada las lleva a la zona de carga eléctrica
+(\texttt{toChargingArea}). En la captura habían salido 13 baterías de la línea y 9 ya estaban en la zona de carga.
+El AGV estuvo ocupado solo el 10\,\% del tiempo, así que un único vehículo alcanza de sobra para el ritmo de la
+línea.
+
+Las fases 7 y 8 cambian cómo se preparan los electrodos. En lugar de una sola cadena de bloques, el tutorial
+encapsula las siete etapas iniciales (empastado, lotes, horno, desagrupado) en un bloque personalizado,
+\texttt{PrepareElectrode}, y lo usa dos veces: \texttt{prepareAnode} y \texttt{prepareCathode}, cada uno con sus
+propios parámetros. En la fase 8 la materia prima de esos bloques ya no se genera como agentes sueltos, sino que
+sale de rollos de plomo modelados con la \emph{Fluid Library}. En la captura cada bloque había entregado 747
+electrodos, y el ensamblador, que ahora combina ánodos y cátodos, había armado 28 bloques.
+
+Al comparar las fases 6 y 8 se ve que la carga de los recursos cambió de sitio. Los montacargas pasaron del 21\,\%
+al 66\,\% de ocupación, porque ahora mueven lotes de ánodos y de cátodos hacia dos zonas de curado, mientras que
+el operario se mantuvo alto (80\,\% y 82\,\%). En las dos capturas hay 5 carcasas esperando en la cola antes de
+\texttt{combine}: las carcasas llegan a 10 por hora y la línea de ensamble no alcanza a producir bloques a ese
+ritmo, lo que confirma que el ensamble sigue siendo el cuello de botella del modelo completo.
 
 % =====================================================
 \section{Conclusiones}
