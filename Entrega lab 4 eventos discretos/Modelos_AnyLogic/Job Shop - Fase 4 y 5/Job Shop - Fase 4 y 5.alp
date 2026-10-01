@@ -4676,7 +4676,7 @@ unloading.stopDelayForAll();]]></Code>
 				<Control Type="Window3D">
 					<Id>1644933654062</Id>
 					<Name><![CDATA[window3d]]></Name>
-					<X>50</X><Y>650</Y>
+					<X>540</X><Y>430</Y>
 					<Width>500</Width>
 					<Height>300</Height>
 					<MakeDefaultViewArea>true</MakeDefaultViewArea>

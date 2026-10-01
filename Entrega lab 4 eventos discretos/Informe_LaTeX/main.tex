@@ -145,14 +145,14 @@ diferenciales, y de la simulación síncrona, que avanza en pasos fijos $\Delta 
 Según \cite{rios08}, los elementos básicos son las variables y los sucesos. Las variables son de tres tipos:
 
 \begin{itemize}[itemsep=1pt]
-\item la \textbf{variable de tiempo} $t$, que lleva el tiempo simulado transcurrido;
-\item las \textbf{variables de estado}, que describen el sistema en el instante $t$ (número de clientes en
+\item la variable de tiempo $t$, que lleva el tiempo simulado transcurrido;
+\item las variables de estado, que describen el sistema en el instante $t$ (número de clientes en
 cola, nivel del inventario);
-\item los \textbf{contadores}, que acumulan lo que ha pasado hasta $t$ (llegadas, salidas, costos) y con los
+\item los contadores, que acumulan lo que ha pasado hasta $t$ (llegadas, salidas, costos) y con los
 que al final se calculan las medidas de desempeño.
 \end{itemize}
 
-A esto se suma una \textbf{lista de sucesos}, que en los ejemplos del curso es la estructura
+A esto se suma una lista de sucesos, que en los ejemplos del curso es la estructura
 \texttt{TSuc}: guarda el instante de cada suceso pendiente y un valor muy grande $M$ cuando no hay ninguno.
 El programa principal repite siempre lo mismo: busca en la lista el suceso más próximo, avanza el reloj hasta
 él y ejecuta la rutina de ese tipo de suceso, que cambia el estado, actualiza contadores y programa sucesos
@@ -276,7 +276,7 @@ valores: media 0,013, desviación 1,002 y prueba de Kolmogorov--Smirnov con $p =
 \item El bucle principal quedó dentro de una función \texttt{simular()} para poder repetirlo, y los
 generadores se reinician al comenzar cada escenario. Así la corrida 1 es reproducible y las corridas 2 a 10
 siguen la secuencia.
-\item \textbf{Corrección de los tiempos medios.} Las listas \texttt{LL}, \texttt{S} y \texttt{Serv} empiezan
+\item Corrección de los tiempos medios. Las listas \texttt{LL}, \texttt{S} y \texttt{Serv} empiezan
 con un valor ficticio $0$ en la posición 0, de modo que el cliente $i$ queda en la posición $i$. El ejemplo
 sumaba las posiciones $0, \dots, \texttt{NLL}-1$, así que incluía el cero ficticio y dejaba por fuera al
 último cliente. Ahora se suman las posiciones $1, \dots, \texttt{NLL}$. En la primera corrida del escenario A
@@ -397,34 +397,34 @@ Medida de desempeño & Escenario A & Escenario B \\
 
 \subsection{¿Qué puede analizar de los resultados comparando los dos escenarios?}
 
-Lo primero es que \textbf{los dos escenarios son inestables}: en A llegan 5 clientes por unidad de tiempo y se
-atienden 3 ($\rho = 1{,}67$), y en B llega 1 y se atiende 0,5 ($\rho = 2$). No hay un régimen estable. La cola
-crece mientras haya llegadas, y por eso todas las medidas dependen de $T$.
+Antes de comparar números hay que notar que ninguno de los dos escenarios es estable. En A llegan 5 clientes
+por unidad de tiempo y el servidor atiende 3 ($\rho = 1{,}67$); en B llega 1 y se atiende 0,5 ($\rho = 2$). La
+cola crece durante toda la ventana de llegadas, así que las cinco medidas dependen de $T$ y no se acercan a un
+valor de equilibrio.
 
-Un cálculo sencillo de ``flujo'' reproduce bastante bien la tabla \ref{tab:51}. Si la cola crece a razón de
-$\lambda - \mu$ clientes por unidad de tiempo, al llegar a $T$ hay unos $(\lambda - \mu)T$ clientes en el
-sistema. En A eso da $(5 - 3)\cdot 40 = 80$, frente a un máximo promedio de 77,6; vaciarlos a 3 por unidad de
-tiempo toma $80/3 \approx 26{,}7$, y el tiempo después de $T$ salió 24,8. En B da $(1 - 0{,}5)\cdot 40 = 20$
-frente a 22,7, y vaciarlos toma $20 \cdot 2 = 40$, frente a 42,7. Con el mismo razonamiento, un cliente que
-llega en el instante $s$ encuentra unos $(\lambda - \mu)s$ clientes delante y espera cerca de $(\rho - 1)s$;
-promediando sobre $[0, T]$ el tiempo en el sistema es del orden de $(\rho - 1)T/2$, es decir, 13,3 en A y 20 en
-B, frente a 12,97 y 24,00 simulados.
+Con eso en mente, un cálculo de ``flujo'' bastante burdo reproduce la tabla \ref{tab:51}. Si la cola crece a
+razón de $\lambda - \mu$ clientes por unidad de tiempo, en $T$ debería haber unos $(\lambda - \mu)T$ clientes. Para
+A son $(5 - 3)\cdot 40 = 80$, y el máximo promedio simulado fue 77,6; sacarlos a 3 por unidad de tiempo toma
+$80/3 \approx 26{,}7$, y la simulación dio 24,8. Para B son $(1 - 0{,}5)\cdot 40 = 20$ contra 22,7, y vaciarlos
+toma $20 \cdot 2 = 40$ contra 42,7. Siguiendo la misma idea, quien llega en el instante $s$ encuentra unos
+$(\lambda - \mu)s$ clientes delante y espera más o menos $(\rho - 1)s$; promediado sobre $[0, T]$ eso da
+$(\rho - 1)T/2$, o sea 13,3 en A y 20 en B. Los valores simulados fueron 12,97 y 24,00.
 
-\textbf{B es peor para el cliente aunque reciba cinco veces menos gente.} En A pasaron 194 clientes en promedio
-y en B 41, pero en B cada cliente estuvo 24,0 unidades de tiempo en el sistema, casi el doble que en A (13,0), y
-el último salió 42,7 unidades después de $T$, contra 24,8 en A. Lo que manda no es cuánta gente llega, sino
-cuánto excede la demanda a la capacidad: en B el servidor necesitaría el doble del tiempo disponible, y en A
-1,67 veces.
+Lo que más me llamó la atención es que B resulta peor para el cliente a pesar de recibir mucha menos gente: en
+promedio entraron 194 clientes en A y apenas 41 en B. Aun así, en B cada cliente pasó 24,0 unidades de tiempo
+en el sistema, casi el doble que en A (13,0), y el último salió 42,7 unidades después de $T$ (en A, 24,8). La
+explicación está en el exceso de demanda sobre la capacidad y no en el volumen: el servidor de B necesitaría el
+doble del tiempo que tiene, y el de A 1,67 veces.
 
-\textbf{B también es más variable.} El coeficiente de variación del tiempo en el sistema es 25\,\% en A
-($3{,}31/12{,}97$) y 41\,\% en B ($9{,}93/24{,}00$). En la corrida 8 de B el último cliente salió 90 unidades
-después de $T$ y en la corrida 9 solo 13. Con unos 40 clientes por corrida, una racha de llegadas o de servicios
-largos pesa mucho; con los 200 de A esos efectos tienden a compensarse.
+B además es más irregular de una corrida a otra. Su coeficiente de variación del tiempo en el sistema es 41\,\%
+($9{,}93/24{,}00$), contra 25\,\% en A ($3{,}31/12{,}97$). En la corrida 8 el último cliente de B salió 90
+unidades después de $T$, y en la 9 solo 13. Con unos 40 clientes por corrida, una racha de llegadas seguidas o
+un par de servicios largos cambian el resultado; con los 200 de A esas rachas se diluyen más.
 
-Por último, en los dos escenarios \textbf{la cola es casi todo el tiempo en el sistema}: la diferencia entre
-ambas medidas es 0,33 en A y 2,01 en B, que son justo los tiempos medios de servicio. Más del 90\,\% del tiempo
-de cada cliente se va en esperar. Mejorar un poco el servicio no alcanzaría; haría falta un segundo servidor o
-limitar las llegadas hasta dejar $\rho < 1$.
+En ambos casos casi todo el tiempo en el sistema es espera. Al restar el tiempo en cola del tiempo en el sistema
+quedan 0,33 en A y 2,01 en B, que coinciden con los tiempos medios de servicio, de modo que más del 90\,\% de la
+estancia se va en la fila. Mejorar un poco el servicio no cambiaría eso; haría falta otro servidor o controlar
+las llegadas hasta bajar $\rho$ de 1.
 
 % =====================================================
 \section{Numeral 5.2: red de colas}
@@ -446,7 +446,7 @@ vehículos y $N(\mu_{32}, \sigma_{32})$ si hay 5 o más, porque los operarios se
 Del nodo 1 el vehículo va a N2 con probabilidad 0,4 o directamente a N3 con probabilidad 0,6, y de N2 siempre
 pasa a N3. Se aceptan llegadas hasta $T = 300$ y se sigue atendiendo hasta que sale el último.
 
-\textbf{Convención de los parámetros.} El ejemplo genera los tiempos entre llegadas con
+Sobre la convención de los parámetros: el ejemplo genera los tiempos entre llegadas con
 \texttt{np.random.exponential(L)} y los servicios de N2 con \texttt{np.random.exponential(mu2)}. NumPy
 interpreta ese argumento como la media (escala), no como la tasa, y se respetó esa convención: con
 $\lambda = 2$ llega en promedio un vehículo cada 2 unidades de tiempo. Leer $\lambda$ como tasa daría un
@@ -457,8 +457,8 @@ de lo que puede atender.
 
 Al revisar los resultados del primer escenario apareció una inconsistencia: por N2 pasaron 59 vehículos con un
 servicio medio de 2,4, pero el número medio de vehículos en N2 salía 0,19. Por la ley de Little debía rondar
-0,46. La causa es que en el ejemplo \textbf{cada rutina acumula el área $n_j(t_{suc} - t)$ solo del nodo que
-ella misma modifica}, pero el reloj \texttt{t} avanza con los sucesos de todos los nodos. Si entre dos sucesos
+0,46. La causa es que en el ejemplo cada rutina acumula el área $n_j(t_{suc} - t)$ solo del nodo que
+ella misma modifica, pero el reloj \texttt{t} avanza con los sucesos de todos los nodos. Si entre dos sucesos
 del nodo 2 ocurre, por ejemplo, una salida del nodo 3, ese tramo se pierde para el nodo 2. El resultado es que
 \texttt{n\_med\_n1}, \texttt{n\_med\_n2} y \texttt{n\_med\_n3} salen subestimados. Se corrigió con una función
 \texttt{acumular\_areas()} que, al comienzo de cada suceso, suma el área de los tres nodos antes de mover el
@@ -615,29 +615,28 @@ $\rho_3$ con $n_3 \ge 5$ & 1,43 & 0,67 \\
 
 \subsection{¿Qué puede decir de la media y la desviación estándar de la muestra para cada medida?}
 
-\textbf{Los conteos son las medidas más estables y sirven de validación.} Por N1 pasaron $152 \pm 12{,}5$
-vehículos en A y $99{,}7 \pm 10{,}9$ en B. Eso es lo que se espera de un proceso de Poisson con
-$300/2 = 150$ y $300/3 = 100$ llegadas en promedio, cuya desviación teórica es $\sqrt{150} \approx 12{,}2$ y
-$\sqrt{100} = 10$. Por N2 pasó el 38,5\,\% de los vehículos en A y el 39,7\,\% en B, muy cerca del 40\,\% del
-modelo. En los dos escenarios $n_3$ y el total del sistema coinciden con $n_1$, porque todos los vehículos
-terminan en N3 y la simulación sigue hasta que sale el último.
+Las medidas de conteo son las que menos se mueven, y de paso sirven para validar el simulador. Por N1 pasaron
+$152 \pm 12{,}5$ vehículos en A y $99{,}7 \pm 10{,}9$ en B (media $\pm$ desviación). Un proceso de Poisson con
+$300/2 = 150$ y $300/3 = 100$ llegadas esperadas tendría desviaciones de $\sqrt{150} \approx 12{,}2$ y
+$\sqrt{100} = 10$, prácticamente lo observado. El 38,5\,\% de los vehículos de A y el 39,7\,\% de los de B pasaron
+por N2, cerca del 40\,\% del modelo. $n_3$ y el total del sistema son iguales a $n_1$ en las 20 repeticiones,
+porque todos terminan en N3 y la simulación no se corta hasta que sale el último.
 
-\textbf{Las medidas de congestión varían mucho más.} El coeficiente de variación está entre 8 y 11\,\% para los
-conteos, pero sube a 25\,\% para el tiempo medio en el sistema de A y a 54\,\% para el número medio en N1 de A
-($3{,}43/6{,}31$). Estas medidas dependen de cómo se juntan las rachas de llegadas y de servicios largos, no solo
-de cuántos vehículos llegan.
+Con las medidas de congestión la historia es otra. Mientras que el coeficiente de variación de los conteos queda
+entre 8 y 11\,\%, el del tiempo medio en el sistema de A llega a 25\,\% y el del número medio en N1 de A a 54\,\%
+($3{,}43/6{,}31$). Aquí ya no importa solo cuántos vehículos llegan, sino cómo se agrupan las llegadas y los
+servicios largos dentro de cada corrida.
 
-\textbf{La mayor variabilidad relativa está siempre en N1}, que en los dos escenarios trabaja con
-$\rho_1 \approx 1$. Una cola en ese punto se comporta casi como una caminata aleatoria: puede pasar largos ratos
-vacía o acumular muchos vehículos según la suerte de la corrida. En la repetición 5 de A, N1 tuvo en promedio
-15,3 vehículos y en la 7 solo 1,5.
+N1 tiene la mayor dispersión relativa en ambos escenarios. Trabaja con $\rho_1 \approx 1$, y en ese punto la cola
+se parece a una caminata aleatoria que puede quedarse vacía un buen rato o acumular muchos vehículos sin
+razón aparente: en la repetición 5 de A el promedio en N1 fue 15,3 vehículos y en la 7 apenas 1,5.
 
-\textbf{En N3 se ve el efecto de la regla de los operarios.} En A tiene la media más alta (22,4 vehículos) pero
-una variación relativa baja, porque está siempre saturado: ni con el ritmo rápido alcanza
-($\rho_3 = 1{,}43$). En B pasa algo interesante. Con menos de 5 vehículos N3 sería inestable ($\rho_3 = 1{,}33$),
-así que la cola crece; al llegar a 5 los operarios aceleran ($\rho_3 = 0{,}67$) y la cola baja. N3 termina
-rondando el umbral, con media 3,96 y la desviación más pequeña de todas las medidas de congestión (0,63). La
-regla funciona como un regulador.
+En N3 se nota la regla de los operarios. En A es el nodo más cargado (22,4 vehículos en promedio), pero su
+variación relativa es baja porque siempre está saturado; ni siquiera al ritmo rápido le alcanza
+($\rho_3 = 1{,}43$). En B ocurre algo curioso. Con menos de 5 vehículos el nodo sería inestable ($\rho_3 = 1{,}33$)
+y la cola sube; cuando llega a 5 los operarios aceleran ($\rho_3 = 0{,}67$) y la cola baja otra vez. El nodo se
+queda dando vueltas alrededor del umbral, con media 3,96 y una desviación de 0,63, la menor entre las medidas
+de congestión. En la práctica la regla actúa como un regulador.
 
 \subsection{¿Qué análisis puede realizar de los intervalos de confianza del 95\,\%?}
 
@@ -646,26 +645,27 @@ La lectura correcta de un intervalo del 95\,\% es que, si se repitiera muchas ve
 medida. Como los dos escenarios tienen algún nodo inestable, no existe un régimen estable que estimar; lo que se
 estima es el comportamiento de un periodo de 300 unidades de tiempo que arranca vacío.
 
-\textbf{La precisión es muy desigual.} El semiancho relativo va de 3,9\,\% para el número de vehículos en A a
-25,4\,\% para el número medio en N1 en A. Para el tiempo medio en el sistema de A el intervalo es
-$[82{,}36;\ 103{,}85]$, con un semiancho de 10,7, el 11,5\,\% de la media. Bajar ese error al 5\,\% exigiría unas
-$n \approx (2{,}093 \cdot 22{,}96 / (0{,}05 \cdot 93{,}10))^2 \approx 107$ corridas, cinco veces más.
+Los intervalos no tienen todos la misma precisión. El semiancho relativo va desde 3,9\,\% en el número de
+vehículos de A hasta 25,4\,\% en el número medio en N1 del mismo escenario. Para el tiempo medio en el sistema
+de A el intervalo es $[82{,}36;\ 103{,}85]$, con semiancho de 10,7 (el 11,5\,\% de la media). Si se quisiera un
+error del 5\,\% habría que correr unas $n \approx (2{,}093 \cdot 22{,}96 / (0{,}05 \cdot 93{,}10))^2 \approx 107$
+repeticiones, cinco veces las que pide la guía.
 
-\textbf{Casi todas las diferencias entre A y B son claras.} En 9 de las 10 medidas los intervalos no se
-traslapan. El tiempo medio en el sistema está entre 82,4 y 103,9 en A y entre 27,3 y 35,3 en B: B es unas tres
-veces mejor para el usuario, aunque su ventanilla sea más lenta (3,0 contra 2,1). La mejora viene de que llegan
-menos vehículos y de que N3, el cuello de botella de A, en B atiende más rápido cuando se congestiona
+Al comparar escenarios, en 9 de las 10 medidas los intervalos de A y B no se cruzan, así que las diferencias son
+claras. El tiempo medio en el sistema queda entre 82,4 y 103,9 en A y entre 27,3 y 35,3 en B; para el usuario B
+es unas tres veces mejor, y eso que su ventanilla es más lenta (3,0 contra 2,1). La ganancia se explica porque
+llegan menos vehículos y porque N3, que en A era el cuello de botella, en B se acelera más cuando se congestiona
 ($\mu_{32} = 2{,}0$ contra 3,0).
 
-\textbf{La única medida sin diferencia significativa es el número medio en N1}: $[4{,}70;\ 7{,}91]$ en A y
-$[3{,}91;\ 6{,}16]$ en B. En los dos escenarios N1 está en $\rho_1 \approx 1$, y con esa variabilidad 20 corridas no
-alcanzan para separar los dos casos. Eso no significa que sean iguales, solo que la muestra no permite afirmar
-que sean distintos.
+La excepción es el número medio en N1, con intervalos $[4{,}70;\ 7{,}91]$ en A y $[3{,}91;\ 6{,}16]$ en B que sí
+se traslapan. Era de esperarse: en los dos escenarios ese nodo trabaja con $\rho_1 \approx 1$ y su variabilidad es
+tan grande que 20 corridas no alcanzan para distinguirlos. Que se traslapen no prueba que sean iguales; solo dice
+que con esta muestra no se puede afirmar que sean distintos.
 
-\textbf{Sobre el supuesto de normalidad.} El intervalo $t$ supone que la media muestral es aproximadamente
-normal. Para los conteos se cumple bien. Para el tiempo después de $T$ o el número medio en N1, con colas largas
-hacia arriba (en B el tiempo después de $T$ fue 12,7 en una repetición y 75,2 en otra), la aproximación con 20
-corridas es más dudosa, y esos intervalos conviene tomarlos como orientativos.
+Queda una salvedad. El intervalo $t$ supone que la media muestral se comporta como una normal, cosa que con 20
+datos es razonable para los conteos pero no tanto para el tiempo después de $T$ o el número medio en N1, que tienen
+colas largas hacia valores altos (en B el tiempo después de $T$ varió entre 12,7 y 75,2). Esos intervalos los
+tomaría como una referencia aproximada.
 
 % =====================================================
 \section{Numeral 5.3: inventario probabilístico}
@@ -707,7 +707,7 @@ $T$ & horizonte de simulación & 100 \\
 
 Los seis primeros valores son los de la guía. Hay que aclarar dos cosas sobre ellos. La guía describe $p$ como
 la ``cantidad de producto a pedir si no hay pedidos pendientes'', pero en el modelo del libro $p$ es el
-\textbf{nivel de reorden} y la cantidad pedida es $P - x$; así aparece también en la Figura 1 de la guía, tomada
+nivel de reorden y la cantidad pedida es $P - x$; así aparece también en la Figura 1 de la guía, tomada
 de la Figura 5.9 del libro, donde los pedidos se marcan como $P - x_1$ y $P - x_2$. Se siguió el libro. La otra
 es que en el libro $h$ es el costo de almacenamiento y el costo del pedido es una función aparte $c(y)$; como la
 guía define $h = 100$ como el valor a pagar por unidad, se usó $c(y) = 100\,y$ y, para el almacenamiento, que la
@@ -831,36 +831,34 @@ $\lambda$ & Beneficio & Benef. ajustado & Satisfechos (\%) & Inventario en cero 
 
 \subsection{Análisis}
 
-\textbf{Una sola corrida no basta para evaluar el beneficio.} En las 30 réplicas con $\lambda = 1$ el beneficio
-fue $6.799{,}61 \pm 3.063{,}02$, con un intervalo del 95\,\% de $[5.655{,}86;\ 7.943{,}36]$, y la corrida
-principal quedó muy por debajo por el pedido de fin de periodo. Buena parte de la variabilidad viene de ese
-efecto de borde: el beneficio ajustado tiene la mitad de desviación (1.549,03). Esto sugiere que la política
-debería considerar el horizonte, por ejemplo no hacer pedidos si faltan menos de $L$ unidades de tiempo para
-cerrar.
+El beneficio de una sola corrida dice poco. En las 30 réplicas con $\lambda = 1$ el promedio fue
+$6.799{,}61 \pm 3.063{,}02$, con intervalo del 95\,\% $[5.655{,}86;\ 7.943{,}36]$, y la corrida principal quedó muy
+abajo por culpa del pedido que llegó después del cierre. Ese efecto de borde explica buena parte de la
+dispersión, porque el beneficio ajustado tiene la mitad de desviación (1.549,03). Una mejora obvia a la política
+sería no pedir cuando falten menos de $L$ unidades de tiempo para terminar el periodo.
 
-\textbf{Con $\lambda = 1$ la política $(p = 20, P = 100)$ da un buen servicio:} 97,27\,\% de clientes
-satisfechos (IC: 96,51 a 98,02) y el inventario en cero solo el 1,92\,\% del tiempo. Durante las $L = 5$
-unidades de tiempo de espera de un pedido se demandan en promedio $\lambda L\,E[D] = 1 \cdot 5 \cdot 3 = 15$
-unidades, menos que las 20 con que se dispara el pedido. Solo cuando la demanda de ese plazo sale alta hay
-faltantes, como pasó en la corrida principal.
+Con $\lambda = 1$ el servicio es bueno: el 97,27\,\% de los clientes quedó satisfecho (IC: 96,51 a 98,02) y el
+inventario estuvo en cero solo el 1,92\,\% del tiempo. Tiene sentido, porque durante las $L = 5$ unidades de tiempo
+que tarda un pedido se demandan en promedio $\lambda L\,E[D] = 1 \cdot 5 \cdot 3 = 15$ unidades, y el pedido se
+lanza cuando todavía quedan 20. Los faltantes aparecen solo cuando la demanda de ese plazo sale más alta de lo
+normal, que fue lo que pasó en la corrida principal.
 
-\textbf{El efecto de $\lambda$ confirma ese razonamiento.} La demanda esperada durante el plazo de entrega es
-$15\lambda$, que supera el punto de reorden cuando $\lambda > 4/3$. La tabla \ref{tab:53lam} muestra el quiebre
-justo ahí: el tiempo con inventario en cero pasa de 1,9\,\% con $\lambda = 1$ a 6,9\,\% con $\lambda = 1{,}5$,
-12,7\,\% con $\lambda = 2$ y 24,9\,\% con $\lambda = 3$, y los clientes satisfechos bajan de 97,3\,\% a 74,2\,\%.
-El beneficio sí crece con $\lambda$ porque se venden más unidades con un margen de 50 cada una, pero con
-$\lambda = 3$ uno de cada cuatro clientes se va sin su pedido completo.
+Ese mismo cálculo anticipa lo que pasa al subir $\lambda$: la demanda del plazo de entrega es $15\lambda$ y supera
+el punto de reorden a partir de $\lambda = 4/3$. En la tabla \ref{tab:53lam} el cambio se nota justo después de
+ese valor. El tiempo sin inventario pasa de 1,9\,\% con $\lambda = 1$ a 6,9\,\% con $\lambda = 1{,}5$, a 12,7\,\%
+con $\lambda = 2$ y a 24,9\,\% con $\lambda = 3$, y los clientes satisfechos caen de 97,3\,\% a 74,2\,\%. El
+beneficio sí aumenta con $\lambda$ (cada unidad vendida deja 50), pero con $\lambda = 3$ uno de cada cuatro
+clientes se va sin lo que pidió.
 
-\textbf{Con poca demanda el negocio pierde.} Con $\lambda = 0{,}5$ el beneficio medio fue negativo ($-2.072$).
-Se vendieron en promedio 152 unidades por 22.780, pero los pedidos costaron 19.307 y el almacenamiento 5.546,
-porque cada pedido de unas 80 unidades tarda unas 53 unidades de tiempo en venderse. Además se terminó con 61
-unidades sin vender en promedio. Para esa demanda convendría un $P$ más bajo.
+En el otro extremo, con $\lambda = 0{,}5$ el negocio pierde plata: el beneficio medio fue $-2.072$. Se vendieron
+152 unidades por 22.780, pero los pedidos costaron 19.307 y el almacenamiento 5.546, ya que con tan poca demanda
+cada pedido de unas 80 unidades tarda unas 53 unidades de tiempo en salir. Encima, al final quedaron en promedio
+61 unidades sin vender. Para ese nivel de demanda el máximo $P = 100$ es demasiado alto.
 
-En resumen, con los valores de la guía $p = 20$ solo es adecuado si llegan a lo sumo 1,3 clientes por unidad de
-tiempo. Para demandas mayores habría que subir el punto de reorden al menos a $15\lambda$ más un margen de
-seguridad, o conseguir un proveedor con menor $L$. El modelo permite probar esas políticas cambiando dos
-parámetros, que es justamente el uso que le da el libro: ayudar a redefinir la política de gestión del
-inventario.
+Con los datos de la guía, entonces, $p = 20$ funciona mientras lleguen a lo sumo unos 1,3 clientes por unidad de
+tiempo. Si la demanda es mayor, el punto de reorden debería subir al menos a $15\lambda$ con algo de margen, o
+habría que buscar un proveedor que entregue más rápido. Probar esas alternativas en el modelo es cuestión de
+cambiar dos parámetros, que es para lo que el libro propone este tipo de simulación.
 
 % =====================================================
 \section{Numeral 5.4: simulación de eventos discretos en SimPy}
@@ -899,7 +897,7 @@ retorno.
 En los pasos 5 y 6 aparecieron dos detalles que valen la pena. Con la versión de las diapositivas que
 interrumpe siempre a los 30 minutos, el segundo orador terminó solo en $t = 57$ y el moderador intentó
 interrumpirlo en $t = 60$; SimPy lanza un \texttt{RuntimeError}, porque no se puede interrumpir un proceso
-terminado. El evento de condición lo resuelve casi siempre, pero no cuando hay \textbf{empate}: con la semilla
+terminado. El evento de condición lo resuelve casi siempre, pero no cuando hay un empate: con la semilla
 usada, el quinto orador habló exactamente 30 minutos. En $t = 145$ ocurren dos eventos a la vez; la condición se
 dispara con el \emph{timeout}, que SimPy procesa primero, así que \texttt{results} no incluye al orador, pero
 antes de que el moderador reanude la charla ya terminó, y el error vuelve a aparecer. La versión robusta pregunta
@@ -990,9 +988,9 @@ mensaje. & Cada mensaje enviado cada 5 unidades llega exactamente 10 después; e
 \end{longtable}
 
 La diferencia con los numerales 5.1 a 5.3 está en el enfoque. Allá se programaba a mano la lista de sucesos, el
-reloj y la elección del suceso más próximo, lo que se conoce como \textbf{programación de eventos}. En SimPy se
+reloj y la elección del suceso más próximo, lo que se conoce como programación de eventos. En SimPy se
 describe lo que hace cada entidad (llegar, pedir un recurso, esperar, salir) y la librería se encarga del reloj y
-de la cola de eventos, lo que se conoce como \textbf{interacción de procesos}. Por eso un modelo con
+de la cola de eventos, lo que se conoce como interacción de procesos. Por eso un modelo con
 interrupciones y prioridades como el taller de máquinas cabe en unas 100 líneas.
 
 % =====================================================
@@ -1022,7 +1020,7 @@ unidad de un \texttt{ResourcePool} de 4 cajeros. La animación usa nodos rectang
 \texttt{TimeMeasureStart} y un \texttt{TimeMeasureEnd}.
 \end{enumerate}
 
-Hay un detalle de los parámetros. El tutorial dice que el tiempo del cajero automático tiene ``media'' 1,5, pero
+Revisando los parámetros encontré algo. El tutorial dice que el tiempo del cajero automático tiene ``media'' 1,5, pero
 según la ayuda de AnyLogic \texttt{triangular(0.8, 1.5, 3.5)} usa 1,5 como moda, así que la media real es
 $(0{,}8 + 1{,}5 + 3{,}5)/3 = 1{,}93$ minutos. Con eso se pueden anticipar las utilizaciones: en la fase 1 el cajero
 automático recibe 0,3 clientes por minuto y su utilización debería rondar $0{,}3 \cdot 1{,}93 = 0{,}58$. En la
@@ -1194,7 +1192,7 @@ En la fase 5, con 800 electrodos generados, el ensamblador había recibido 675 y
 baterías que salieron de la línea, 39 pasaron el control de calidad y 1 se desvió a la banda de defectuosas
 (\texttt{conveyDefective}).
 
-Lo más interesante es la utilización de los recursos. En la fase 3 los montacargas estaban ocupados el 54\,\% del
+La utilización de los recursos es lo que más información da. En la fase 3 los montacargas estaban ocupados el 54\,\% del
 tiempo y el operario del ensamble el 35\,\%. En la fase 5 los montacargas bajaron al 31\,\% y el operario subió al
 94\,\%: con la línea completa, el ensamble de bloques se vuelve el cuello de botella, mientras que los montacargas
 tienen capacidad de sobra. Si se quisiera producir más baterías, el primer cambio sería un segundo operario en el
@@ -1226,39 +1224,34 @@ ritmo, lo que confirma que el ensamble sigue siendo el cuello de botella del mod
 \section{Conclusiones}
 % =====================================================
 
-\begin{enumerate}[itemsep=4pt]
+Casi todo lo que pasó en las colas se puede explicar con la intensidad de tráfico. Los dos escenarios de la
+cola G/G/1 tienen $\rho > 1$, y una cuenta tan sencilla como $(\lambda - \mu)T$ anticipó el máximo de clientes
+(80 contra 77,6 en A y 20 contra 22,7 en B) y el tiempo que tarda el sistema en vaciarse. Por la misma razón el
+escenario B, con cinco veces menos clientes, trató peor a cada uno: 24,0 unidades de tiempo en el sistema contra
+13,0, porque su demanda excede más a la capacidad.
 
-\item La intensidad de tráfico explica casi todo lo observado en las colas. En los dos escenarios de la cola
-G/G/1, $\rho > 1$, y un cálculo de flujo tan simple como $(\lambda - \mu)T$ anticipó el número máximo de clientes
-(80 contra 77,6 en A y 20 contra 22,7 en B) y el tiempo para vaciar el sistema. El escenario B, con cinco veces
-menos clientes, fue peor para cada cliente (24,0 contra 13,0 de tiempo medio en el sistema) porque su exceso de
-demanda sobre la capacidad es mayor.
+En la red de colas el cuello de botella no estuvo en el mismo sitio. En A fue la nave principal, que no daba
+abasto ni siquiera trabajando rápido ($\rho_3 = 1{,}43$); en B pasó a ser la ventanilla, con $\rho_1 = 1$. La regla
+de apurarse desde 5 vehículos hizo que en B la nave principal se quedara cerca de 4 vehículos, con la menor
+dispersión de todas las medidas de congestión. Con 20 repeticiones los intervalos de confianza separaron 9 de
+las 10 medidas entre escenarios; la que no, el número medio en la ventanilla, es justo la más variable. Para
+llevar el error del tiempo en el sistema al 5\,\% habría que hacer unas 107 corridas.
 
-\item En la red de colas el cuello de botella cambió de nodo entre escenarios: en A fue la nave principal,
-saturada incluso a ritmo rápido ($\rho_3 = 1{,}43$), y en B la ventanilla ($\rho_1 = 1$). La regla de apurarse con 5
-o más vehículos convierte a N3 en un regulador en el escenario B, que se mantiene cerca de 4 vehículos con la
-menor dispersión de todas las medidas.
+Comparar con la teoría sirvió para algo más que confirmar resultados. Con la ley de Little apareció un error en el ejemplo de
+la red de colas, que subestimaba el número medio de vehículos por nodo (16,94 en lugar de 23,15 en N3), y al
+revisar los índices del ejemplo G/G/1 se vio que dejaba por fuera al último cliente. En el pseudocódigo del
+inventario del libro también hubo que corregir tres detalles antes de que los resultados tuvieran sentido.
 
-\item Los intervalos de confianza mostraron que 20 repeticiones separan con claridad 9 de las 10 medidas entre
-los dos escenarios, pero no el número medio en la ventanilla, que es la medida más variable por trabajar con
-$\rho_1 \approx 1$. Para bajar el error del tiempo en el sistema al 5\,\% se necesitarían unas 107 corridas.
+Del inventario me quedo con que la política $(p = 20, P = 100)$ con $L = 5$ funciona mientras la demanda esperada
+durante la entrega, $15\lambda$, no pase del punto de reorden. Arriba de $\lambda \approx 1{,}3$ los faltantes se
+disparan, y con $\lambda = 3$ uno de cada cuatro clientes no recibe lo que pidió. También aprendí a desconfiar del
+beneficio de una sola corrida: un pedido que llega después del cierre puede cambiarlo por completo.
 
-\item Validar los resultados contra la teoría sirvió para encontrar errores reales. La ley de Little reveló que
-el ejemplo de la red de colas subestimaba el número medio de vehículos por nodo (en N3, 16,94 en lugar de 23,15),
-y la revisión de índices mostró que el ejemplo G/G/1 dejaba por fuera al último cliente. En el libro también
-hubo que corregir tres detalles del pseudocódigo del inventario.
-
-\item En el inventario, la política $(p = 20, P = 100)$ con $L = 5$ funciona mientras la demanda esperada en el
-plazo de entrega, $15\lambda$, no supere el punto de reorden. Por encima de $\lambda \approx 1{,}3$ los faltantes
-crecen rápido, y con $\lambda = 3$ uno de cada cuatro clientes no queda satisfecho. El beneficio de una sola
-corrida puede engañar por el pedido que llega después del cierre.
-
-\item SimPy y AnyLogic resuelven los mismos problemas con otro enfoque: en lugar de programar la lista de
-sucesos, se describe lo que hace cada entidad (SimPy) o se arma el proceso con bloques gráficos (AnyLogic).
-Ahorran mucho código, pero no eximen de entender el mecanismo; el caso del moderador en SimPy mostró que un
-empate entre dos eventos simultáneos puede romper un modelo que parece correcto.
-
-\end{enumerate}
+Por último, SimPy y AnyLogic atacan los mismos problemas desde otro lado. En vez de programar la lista de sucesos
+se describe lo que hace cada entidad, en código en SimPy o con bloques en AnyLogic, y eso ahorra mucho trabajo.
+Aun así hay que entender lo que pasa por debajo. El moderador de SimPy falló por un empate entre dos eventos
+simultáneos, y en el Bank office solo se pudo saber que las gráficas tenían sentido calculando a mano la cola
+M/G/1: el tiempo medio en el sistema dio 4,38 minutos simulados contra 4,43 esperados.
 
 % =====================================================
 \section{Anexos}
