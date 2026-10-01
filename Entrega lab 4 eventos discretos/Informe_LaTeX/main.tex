@@ -1158,6 +1158,21 @@ procesan las estibas durante 1 minuto.
 \captura{al_job_f3.png}{Job shop, fase 3: animación 3D.}
 \captura{al_job_f5.png}{Job shop, fases 4 y 5: modelo completo con camiones y máquinas CNC.}
 
+En las fases 1 a 3 las estibas llegan de a una cada 5 minutos y el sistema está holgado. En la captura de la
+fase 3 habían llegado 13 estibas, 5 estaban guardadas en la estantería y 7 ya habían salido, y los montacargas
+estaban ocupados solo el 9\,\% del tiempo. Con cinco montacargas para una estiba cada 5 minutos sobra capacidad,
+y en la animación casi todos permanecen quietos en su zona de espera.
+
+Las fases 4 y 5 cambian el patrón de llegadas, y con eso el comportamiento. Ahora un camión llega, descarga y el
+\texttt{inject(60)} crea 60 estibas de golpe. En la captura había llegado un solo camión y sus 60 estibas ya
+habían pasado por la estantería, pero 29 estaban detenidas en \texttt{seizeCNC} esperando una de las dos máquinas,
+y solo 29 habían terminado el proceso. La ocupación de los montacargas subió al 39\,\% y la de las máquinas CNC al
+63\,\%. El procesamiento en sí dura apenas 1 minuto, así que lo que limita a las CNC es que cada estiba debe ser
+traída por un montacargas desde la estantería mientras la máquina queda reservada. Además, 60 estibas por hora es un ritmo
+cinco veces mayor que el de las primeras fases (una cada 5 minutos) y llega concentrado en un solo instante, lo
+que crea una cola que el sistema tarda en vaciar. Por eso, en la vista 2D, la estantería aparece con muchas
+estibas amarillas esperando a ser llevadas a las máquinas.
+
 \subsection{Lead acid battery production (manejo de materiales)}
 
 Es el tutorial más largo. Modela una línea de producción de baterías de plomo-ácido con la \emph{Material
