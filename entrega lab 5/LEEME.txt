@@ -1,0 +1,26 @@
+LABORATORIO 5 - ANALISIS DE DATOS DE ENTRADA Y BONDAD DE AJUSTE
+Simulacion Computacional - Universidad de los Llanos
+Duvan Felipe Baquero - Codigo 160005002
+Guia FO-DOC-112 (Practica N.o 04)
+
+CONTENIDO
+
+  Informe_Lab5_AnalisisDatosEntrada_160005002.pdf
+      Informe compilado desde LaTeX (consulta previa y numerales 5.1, 5.2 y 5.3).
+
+  Lab5_5.1_5.2_160005002.ipynb
+      Estadistica descriptiva (Tabla 1, histogramas) y analisis de datos de entrada
+      (autocorrelacion, dispersion, patron de llegadas, conteos por intervalo y media movil).
+
+  Lab5_5.3_AjusteCurvas_160005002.ipynb
+      Cuaderno independiente del ajuste de curvas: 9 distribuciones por conjunto,
+      SSE, AIC y BIC, las tres mejores y la seleccion final.
+
+  conjunto de datos/
+      dataset-A.txt a dataset-D.txt (200 valores cada uno). Los cuadernos los leen de
+      esta carpeta o de la misma carpeta del cuaderno; si no los encuentran (por ejemplo
+      en Colab) los descargan de los enlaces de Google Drive de la guia.
+
+  Informe_LaTeX/
+      main.tex, tablas/ y figuras/ (generadas por los cuadernos). Para Overleaf se sube
+      la carpeta completa y se compila main.tex.
